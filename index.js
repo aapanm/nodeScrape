@@ -6,6 +6,7 @@ import {
   getNextPageUrl,
   getListIdWithUrl,
   getTotalAdsCount,
+  scrapeTruckItem,
 } from "./src/scrap/scrapping.js";
 
 async function storeNextPageUrls(urls) {
@@ -24,7 +25,7 @@ async function storeNextPageUrls(urls) {
 
 async function storeListIdUrl(list) {
   const csvWriter = createObjectCsvWriter({
-    path: "src/data/id_Url.csv",
+    path: "src/data/item_id_with_url.csv",
     header: [
       { id: "id", title: "ID" },
       { id: "url", title: "URL" },
@@ -35,6 +36,27 @@ async function storeListIdUrl(list) {
   try {
     await csvWriter.writeRecords(list);
     console.log("data id and links recorded");
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function storeTruckInfo(turckInfo) {
+  const csvWriter = createObjectCsvWriter({
+    path: "src/data/inital_page_truck_info.csv",
+    header: [
+      { id: "id", title: "ID" },
+      { id: "title", title: "TITLE" },
+      { id: "price", title: "PRICE" },
+      { id: "mileage", title: "MILEAGE" },
+      { id: "power", title: "POWER" },
+    ],
+    alwaysQuote: true,
+  });
+
+  try {
+    await csvWriter.writeRecords(turckInfo);
+    console.log("truck info recorded");
   } catch (e) {
     console.log(e);
   }
@@ -53,8 +75,10 @@ async function main() {
     await storeListIdUrl(listIdUrl);
 
     const totalAdsCount = getTotalAdsCount($.html());
-
     console.log(`total ads count: ${totalAdsCount}`);
+
+    const scrapedTruckData = scrapeTruckItem($.html());
+    await storeTruckInfo(scrapedTruckData);
   } catch (e) {
     console.log(e);
   }
