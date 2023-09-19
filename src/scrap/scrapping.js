@@ -32,4 +32,11 @@ function getListIdWithUrl(html) {
   return idUrl;
 }
 
-export { getNextPageUrl, getListIdWithUrl };
+function getTotalAdsCount(html) {
+  const $ = cheerio.load(html);
+  const resultPara = $("p.ev5apm50");
+  const count = $(resultPara).find("b").first().text();
+  return count;
+}
+
+export { getNextPageUrl, getListIdWithUrl, getTotalAdsCount };

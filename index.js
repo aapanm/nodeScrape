@@ -2,7 +2,11 @@ import axios from "axios";
 import config from "./config/config.js";
 import * as cheerio from "cheerio";
 import { createObjectCsvWriter } from "csv-writer";
-import { getNextPageUrl, getListIdWithUrl } from "./src/scrap/scrapping.js";
+import {
+  getNextPageUrl,
+  getListIdWithUrl,
+  getTotalAdsCount,
+} from "./src/scrap/scrapping.js";
 
 async function storeNextPageUrls(urls) {
   const csvWriter = createObjectCsvWriter({
@@ -47,6 +51,10 @@ async function main() {
 
     const listIdUrl = getListIdWithUrl($.html());
     await storeListIdUrl(listIdUrl);
+
+    const totalAdsCount = getTotalAdsCount($.html());
+
+    console.log(`total ads count: ${totalAdsCount}`);
   } catch (e) {
     console.log(e);
   }
