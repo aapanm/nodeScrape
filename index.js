@@ -1,66 +1,15 @@
 import axios from "axios";
 import config from "./config/config.js";
 import * as cheerio from "cheerio";
-import { createObjectCsvWriter } from "csv-writer";
+
 import {
   getNextPageUrl,
   getListIdWithUrl,
   getTotalAdsCount,
   scrapeTruckItem,
+  scrapeAllPages,
 } from "./src/scrap/scrapping.js";
-
-async function storeNextPageUrls(urls) {
-  const csvWriter = createObjectCsvWriter({
-    path: "src/data/links.csv",
-    header: [{ id: "url", title: "URL" }],
-    alwaysQuote: true,
-  });
-  try {
-    await csvWriter.writeRecords(urls);
-    console.log("links recorded!");
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function storeListIdUrl(list) {
-  const csvWriter = createObjectCsvWriter({
-    path: "src/data/item_id_with_url.csv",
-    header: [
-      { id: "id", title: "ID" },
-      { id: "url", title: "URL" },
-    ],
-    alwaysQuote: true,
-  });
-
-  try {
-    await csvWriter.writeRecords(list);
-    console.log("data id and links recorded");
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function storeTruckInfo(turckInfo) {
-  const csvWriter = createObjectCsvWriter({
-    path: "src/data/inital_page_truck_info.csv",
-    header: [
-      { id: "id", title: "ID" },
-      { id: "title", title: "TITLE" },
-      { id: "price", title: "PRICE" },
-      { id: "mileage", title: "MILEAGE" },
-      { id: "power", title: "POWER" },
-    ],
-    alwaysQuote: true,
-  });
-
-  try {
-    await csvWriter.writeRecords(turckInfo);
-    console.log("truck info recorded");
-  } catch (e) {
-    console.log(e);
-  }
-}
+import { storeTruckInfo, storeListIdUrl } from "./src/dataStore.js";
 
 async function main() {
   try {
@@ -68,17 +17,20 @@ async function main() {
 
     const $ = cheerio.load(response.data);
 
-    const nextPageUrls = getNextPageUrl($.html());
-    await storeNextPageUrls(nextPageUrls);
+    const nextPageUrl = await getNextPageUrl(config.scrapeUrl, 1);
+    console.log(nextPageUrl);
 
-    const listIdUrl = getListIdWithUrl($.html());
+    const listIdUrl = await getListIdWithUrl(config.scrapeUrl);
     await storeListIdUrl(listIdUrl);
 
-    const totalAdsCount = getTotalAdsCount($.html());
+    const totalAdsCount = await getTotalAdsCount(config.scrapeUrl);
     console.log(`total ads count: ${totalAdsCount}`);
 
-    const scrapedTruckData = scrapeTruckItem($.html());
-    await storeTruckInfo(scrapedTruckData);
+    const initalPageTruckData = await scrapeTruckItem(config.scrapeUrl);
+    await storeTruckInfo(initalPageTruckData, "initial");
+
+    const allScrapedData = await scrapeAllPages();
+    await storeTruckInfo(allScrapedData, "all");
   } catch (e) {
     console.log(e);
   }
