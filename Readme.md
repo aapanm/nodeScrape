@@ -1,6 +1,6 @@
 # Web Scraping using Node.js
 
-This Node.js script is designed to scrape data from the Otomoto website for Mercedes-Benz trucks produced since 2014 and using the Actros model. The script performs the following tasks:
+This Node.js script is designed to scrape data from the Otomoto website for Mercedes-Benz trucks. The script performs the following tasks:
 
 1. **Get Next Page URL**: `getNextPageUrl` function from [scrapping.js](/src/scrap/scrapping.js) finds the next pagination page link to scrape data
 
